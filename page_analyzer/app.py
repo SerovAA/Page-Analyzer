@@ -1,6 +1,8 @@
 import os
 import psycopg2
 import validators
+import requests
+
 from flask import Flask, render_template
 from flask import flash, redirect, url_for, request
 from dotenv import load_dotenv
@@ -9,6 +11,7 @@ from psycopg2.extras import NamedTupleCursor
 from urllib.parse import urlparse
 
 MAX_URL_LEN = 255
+
 load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -40,7 +43,8 @@ def urls_post():
             try:
                 cursor.execute("INSERT INTO urls (name, created_at)\
                                 VALUES (%s, %s) RETURNING id",
-                               (new_url, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                               (new_url,
+                                datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                 url_info = cursor.fetchone()
                 url_id = url_info.id
                 flash('Страница успешно добавлена', 'alert-success')
@@ -68,7 +72,7 @@ def normalize_url(url):
 def find_by_name(name: str):
     with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
-            cursor.execute("SELECT * FROM urls WHERE name = %s", (name,))
+            cursor.execute("SELECT * FROM urls WHERE name = %s", (name, ))
             return cursor.fetchone()
 
 
@@ -98,12 +102,56 @@ def find_all_urls():
 @app.route('/urls/<int:id>', methods=['GET'])
 def one_url(id: int):
     url = find_by_id(id)
+
+    if url is None:
+        flash('Такой страницы не существует', 'alert-warning')
+        return redirect(url_for('index'))
+
     return render_template('show.html', ID=id, name=url.name,
-                           created_at=url.created_at)
+                           created_at=url.created_at,
+                           checks=find_checks(id))
 
 
 def find_by_id(id: int):
     with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
-            cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
+            cursor.execute("SELECT * FROM urls WHERE id = %s", (id, ))
             return cursor.fetchone()
+
+
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def check_url(id: int):
+    url = find_by_id(id)
+
+    try:
+        with requests.get(url.name) as response:
+            response.raise_for_status()
+
+    except requests.exceptions.RequestException:
+        flash('Произошла ошибка при проверке', 'alert-danger')
+        return render_template('show.html', ID=id, name=url.name,
+                               created_at=url.created_at,
+                               checks=find_checks(id)), 422
+
+    with get_connected() as connection:
+        with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
+            cursor.execute("INSERT INTO url_checks (url_id, created_at)\
+                            VALUES (%s, %s) RETURNING id",
+                           (id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
+            flash('Страница успешно проверена', 'alert-success')
+
+    return redirect(url_for('one_url', id=id))
+
+
+def find_checks(url_id: int):
+    url_checks = []
+
+    with get_connected() as connection:
+        with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
+            cursor.execute("SELECT * FROM url_checks WHERE url_id = %s\
+                           ORDER BY id DESC",
+                           (url_id, ))
+            url_checks.extend(cursor.fetchall())
+
+    return url_checks
