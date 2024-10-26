@@ -16,6 +16,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
+# conn = psycopg2.connect(DATABASE_URL)
 
 
 def get_connected():
@@ -125,6 +126,7 @@ def check_url(id: int):
 
     try:
         with requests.get(url.name) as response:
+            status_code = response.status_code
             response.raise_for_status()
 
     except requests.exceptions.RequestException:
@@ -134,10 +136,12 @@ def check_url(id: int):
                                checks=find_checks(id)), 422
 
     with get_connected() as connection:
-        with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
-            cursor.execute("INSERT INTO url_checks (url_id, created_at)\
-                            VALUES (%s, %s) RETURNING id",
-                           (id, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO url_checks (url_id, status_code,\
+                            created_at)\
+                            VALUES (%s, %s, %s)",
+                           (id, status_code,
+                            datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
             flash('Страница успешно проверена', 'alert-success')
 
