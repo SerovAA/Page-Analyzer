@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block main %}
+    <div class="container-lg mt-3">
+        <h1>Сайт: {{ name }}</h1>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover text-nowrap" data-test="url">
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ ID }}</td>
+                    </tr>
+                    <tr>
+                        <td>Имя</td>
+                        <td>{{ name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Дата создания</td>
+                        <td>{{ created_at }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
