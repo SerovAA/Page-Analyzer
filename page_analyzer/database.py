@@ -48,7 +48,8 @@ def find_checks(cursor, url_id: int):
 
 
 @use_connection
-def add_check(cursor, id: int, status_code: int, h1: str, title: str, description: str):
+def add_check(cursor, id: int, status_code: int,
+              h1: str, title: str, description: str):
     """Добавляет запись о проверке для URL в базу данных."""
     cursor.execute(
         """

@@ -44,6 +44,8 @@ def get_one_url(id: int):
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id: int):
-    """Запускает проверку URL на доступность и добавляет результат в базу данных."""
+    """
+    Запускает проверку URL на доступность и добавляет результат в базу данных.
+    """
     check_and_add_url_check(id, flash)
     return redirect(url_for('get_one_url', id=id))

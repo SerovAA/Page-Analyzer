@@ -9,7 +9,7 @@ def get_connection():
 
 
 def use_connection(func):
-    """Декоратор для предоставления подключения и курсора для выполнения запросов."""
+    """Декоратор для предоставления подключения и курсора."""
     def wrapper(*args, **kwargs):
         with (get_connection() as connection,
               connection.cursor(cursor_factory=NamedTupleCursor) as cursor):

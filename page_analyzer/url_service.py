@@ -33,7 +33,10 @@ def check_url_status(url):
 
 
 def process_url_submission(cursor, url_from_request: str):
-    """Обрабатывает отправленный URL, проверяя его и добавляя в базу, если нет дубликатов."""
+    """
+    Обрабатывает отправленный URL, проверяя его
+    и добавляя в базу, если нет дубликатов.
+    """
     errors = validate_url(url_from_request)
     url_id = None
     is_duplicate = False
@@ -56,7 +59,7 @@ def process_url_submission(cursor, url_from_request: str):
 
 
 def handle_flash_messages(errors: list, is_duplicate: bool, url_id: int):
-    """"Обрабатывает flash-сообщения для уведомления пользователя об ошибках или успехе."""
+    """"Обрабатывает flash-сообщения для уведомления об ошибках или успехе."""
     if errors:
         flash('Некорректный URL', 'alert-danger')
         return render_template('index.html'), 422
