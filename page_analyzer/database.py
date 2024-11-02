@@ -4,6 +4,7 @@ from .db_decorators import use_connection
 
 @use_connection
 def find_all_urls(cursor):
+    """Возвращает все URL из базы данных с информацией о последней проверке."""
     cursor.execute(
         """
         SELECT urls.id, urls.name,
@@ -20,18 +21,21 @@ def find_all_urls(cursor):
 
 @use_connection
 def find_by_id(cursor, id: int):
+    """Находит URL по ID."""
     cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
     return cursor.fetchone()
 
 
 @use_connection
 def find_by_name(cursor, name: str):
+    """Находит URL по имени."""
     cursor.execute("SELECT * FROM urls WHERE name = %s", (name,))
     return cursor.fetchone()
 
 
 @use_connection
 def find_checks(cursor, url_id: int):
+    """Возвращает все проверки для указанного URL по ID."""
     cursor.execute(
         """
         SELECT * FROM url_checks
@@ -44,7 +48,8 @@ def find_checks(cursor, url_id: int):
 
 
 @use_connection
-def add_check(cursor, id, status_code, h1, title, description):
+def add_check(cursor, id: int, status_code: int, h1: str, title: str, description: str):
+    """Добавляет запись о проверке для URL в базу данных."""
     cursor.execute(
         """
         INSERT INTO url_checks (url_id, status_code, h1,
@@ -56,7 +61,8 @@ def add_check(cursor, id, status_code, h1, title, description):
     )
 
 
-def add_url(cursor, new_url):
+def add_url(cursor, new_url: str):
+    """Добавляет новый URL в базу данных и возвращает его ID."""
     cursor.execute(
         """
         INSERT INTO urls (name, created_at)

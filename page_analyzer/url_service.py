@@ -1,13 +1,13 @@
 import psycopg2
 import requests
 from flask import render_template, flash, redirect, url_for
-
 from .database import (add_url, find_by_name, find_by_id, add_check)
 from .url_check import validate_url, normalize_url
 from .parser import get_seo_data
 
 
-def process_url(url_from_request, cursor):
+def process_url(url_from_request: str, cursor):
+    """Обрабатывает URL, проверяя его на ошибки и добавляя в базу."""
     errors = validate_url(url_from_request)
     if errors:
         return None, errors
@@ -22,6 +22,7 @@ def process_url(url_from_request, cursor):
 
 
 def check_url_status(url):
+    """Проверяет статус переданного URL, возвращая SEO-данные."""
     try:
         with requests.get(url.name) as response:
             response.raise_for_status()
@@ -31,7 +32,8 @@ def check_url_status(url):
         return None, None, None, None, str(e)
 
 
-def process_url_submission(cursor, url_from_request):
+def process_url_submission(cursor, url_from_request: str):
+    """Обрабатывает отправленный URL, проверяя его и добавляя в базу, если нет дубликатов."""
     errors = validate_url(url_from_request)
     url_id = None
     is_duplicate = False
@@ -53,7 +55,8 @@ def process_url_submission(cursor, url_from_request):
     return handle_flash_messages(errors, is_duplicate, url_id)
 
 
-def handle_flash_messages(errors, is_duplicate, url_id):
+def handle_flash_messages(errors: list, is_duplicate: bool, url_id: int):
+    """"Обрабатывает flash-сообщения для уведомления пользователя об ошибках или успехе."""
     if errors:
         flash('Некорректный URL', 'alert-danger')
         return render_template('index.html'), 422
@@ -70,7 +73,8 @@ def handle_flash_messages(errors, is_duplicate, url_id):
     return render_template('index.html'), 500
 
 
-def handle_get_one_url(id):
+def handle_get_one_url(id: int):
+    """Возвращает URL по идентификатору или уведомляет, если URL не найден."""
     url = find_by_id(id)
     if url is None:
         flash('Такой страницы не существует', 'alert-warning')
@@ -78,7 +82,8 @@ def handle_get_one_url(id):
     return url
 
 
-def check_and_add_url_check(id, flash):
+def check_and_add_url_check(id: int, flash):
+    """Проверяет и добавляет проверку для URL с переданным идентификатором."""
     url = find_by_id(id)
     status_code, h1, title, description, error = check_url_status(url)
 
