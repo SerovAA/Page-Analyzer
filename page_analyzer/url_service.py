@@ -7,7 +7,10 @@ from .parser import get_seo_data
 
 
 def process_url(url_from_request: str, cursor):
-    """Обрабатывает URL, проверяя его на ошибки и добавляя в базу."""
+    """
+    Processes the URL, checking it for
+    errors and adding it to the database.
+    """
     errors = validate_url(url_from_request)
     if errors:
         return None, errors
@@ -22,7 +25,7 @@ def process_url(url_from_request: str, cursor):
 
 
 def check_url_status(url):
-    """Проверяет статус переданного URL, возвращая SEO-данные."""
+    """Checks the status of the passed URL, returning SEO data."""
     try:
         with requests.get(url.name) as response:
             response.raise_for_status()
@@ -34,8 +37,8 @@ def check_url_status(url):
 
 def process_url_submission(cursor, url_from_request: str):
     """
-    Обрабатывает отправленный URL, проверяя его
-    и добавляя в базу, если нет дубликатов.
+    Processes the submitted URL, checking it
+    and adding it to the database if there are no duplicates.
     """
     errors = validate_url(url_from_request)
     url_id = None
@@ -59,7 +62,7 @@ def process_url_submission(cursor, url_from_request: str):
 
 
 def handle_flash_messages(errors: list, is_duplicate: bool, url_id: int):
-    """"Обрабатывает flash-сообщения для уведомления об ошибках или успехе."""
+    """"Processes flash messages to notify about errors or success."""
     if errors:
         flash('Некорректный URL', 'alert-danger')
         return render_template('index.html'), 422
@@ -77,7 +80,7 @@ def handle_flash_messages(errors: list, is_duplicate: bool, url_id: int):
 
 
 def handle_get_one_url(id: int):
-    """Возвращает URL по идентификатору или уведомляет, если URL не найден."""
+    """Returns a URL by ID or notifies if the URL is not found."""
     url = find_by_id(id)
     if url is None:
         flash('Такой страницы не существует', 'alert-warning')
@@ -85,15 +88,28 @@ def handle_get_one_url(id: int):
     return url
 
 
-def check_and_add_url_check(id: int, flash):
-    """Проверяет и добавляет проверку для URL с переданным идентификатором."""
+def check_and_add_url_check(id: int):
+    """Checks and adds a check for the URL with the passed ID."""
     url = find_by_id(id)
     status_code, h1, title, description, error = check_url_status(url)
 
     if error:
-        flash(f'Произошла ошибка при проверке: {error}', 'alert-danger')
-        return None
+        return {'error': error}
 
     add_check(id, status_code, h1, title, description)
-    flash('Страница успешно проверена', 'alert-success')
-    return status_code, h1, title, description
+    return {
+        'status_code': status_code,
+        'h1': h1,
+        'title': title,
+        'description': description
+    }
+
+
+def flash_message(result):
+    """Generates a flash message based on the result of the URL check."""
+    if 'error' in result:
+        flash(f'Произошла ошибка при проверке: '
+              f'{result["error"]}', 'alert-danger')
+
+    else:
+        flash('Страница успешно проверена', 'alert-success')

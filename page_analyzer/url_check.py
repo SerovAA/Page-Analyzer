@@ -6,7 +6,7 @@ MAX_URL_LEN = 255
 
 
 def validate_url(url: str):
-    """Проверяет URL на корректность и длину."""
+    """Checks URL for correctness and length."""
     errors = []
     if not validators.url(url) or len(url) > MAX_URL_LEN:
         errors.append('Некорректный URL')
@@ -14,6 +14,6 @@ def validate_url(url: str):
 
 
 def normalize_url(url: str):
-    """Приводит URL к стандартному виду."""
+    """Converts URL to standard form."""
     parsed_url = urlparse(url)
     return f'{parsed_url.scheme}://{parsed_url.netloc}'

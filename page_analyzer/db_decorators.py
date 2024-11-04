@@ -4,12 +4,12 @@ from psycopg2.extras import NamedTupleCursor
 
 
 def get_connection():
-    """Создает подключение к базе данных."""
+    """Creates a connection to a database."""
     return psycopg2.connect(DATABASE_URL)
 
 
 def use_connection(func):
-    """Декоратор для предоставления подключения и курсора."""
+    """Decorator to provide connection and cursor."""
     def wrapper(*args, **kwargs):
         with (get_connection() as connection,
               connection.cursor(cursor_factory=NamedTupleCursor) as cursor):

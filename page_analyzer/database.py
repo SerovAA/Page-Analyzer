@@ -4,7 +4,10 @@ from .db_decorators import use_connection
 
 @use_connection
 def find_all_urls(cursor):
-    """Возвращает все URL из базы данных с информацией о последней проверке."""
+    """
+    Returns all URLs from the database with
+    information about the last check.
+    """
     cursor.execute(
         """
         SELECT urls.id, urls.name,
@@ -21,21 +24,21 @@ def find_all_urls(cursor):
 
 @use_connection
 def find_by_id(cursor, id: int):
-    """Находит URL по ID."""
+    """Finds URL by ID."""
     cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
     return cursor.fetchone()
 
 
 @use_connection
 def find_by_name(cursor, name: str):
-    """Находит URL по имени."""
+    """Finds URL by name."""
     cursor.execute("SELECT * FROM urls WHERE name = %s", (name,))
     return cursor.fetchone()
 
 
 @use_connection
 def find_checks(cursor, url_id: int):
-    """Возвращает все проверки для указанного URL по ID."""
+    """Returns all checks for the specified URL by ID."""
     cursor.execute(
         """
         SELECT * FROM url_checks
@@ -50,7 +53,7 @@ def find_checks(cursor, url_id: int):
 @use_connection
 def add_check(cursor, id: int, status_code: int,
               h1: str, title: str, description: str):
-    """Добавляет запись о проверке для URL в базу данных."""
+    """Adds a verification record for a URL to the database."""
     cursor.execute(
         """
         INSERT INTO url_checks (url_id, status_code, h1,
@@ -63,7 +66,7 @@ def add_check(cursor, id: int, status_code: int,
 
 
 def add_url(cursor, new_url: str):
-    """Добавляет новый URL в базу данных и возвращает его ID."""
+    """Adds a new URL to the database and returns its ID."""
     cursor.execute(
         """
         INSERT INTO urls (name, created_at)
