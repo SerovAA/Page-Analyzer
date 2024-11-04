@@ -26,13 +26,10 @@ def process_url(url_from_request: str, cursor):
 
 def check_url_status(url):
     """Checks the status of the passed URL, returning SEO data."""
-    try:
-        with requests.get(url.name) as response:
-            response.raise_for_status()
-            h1, title, description = get_seo_data(response.text)
-            return response.status_code, h1, title, description, None
-    except requests.exceptions.RequestException as e:
-        return None, None, None, None, str(e)
+    response = requests.get(url.name)
+    response.raise_for_status()
+    h1, title, description = get_seo_data(response.text)
+    return response.status_code, h1, title, description
 
 
 def process_url_submission(cursor, url_from_request: str):
@@ -40,11 +37,11 @@ def process_url_submission(cursor, url_from_request: str):
     Processes the submitted URL, checking it
     and adding it to the database if there are no duplicates.
     """
-    errors = validate_url(url_from_request)
+    has_errors = bool(validate_url(url_from_request))
     url_id = None
     is_duplicate = False
 
-    if not errors:
+    if not has_errors:
         new_url = normalize_url(url_from_request)
         try:
             add_url(cursor, new_url)
@@ -58,12 +55,12 @@ def process_url_submission(cursor, url_from_request: str):
             if url:
                 url_id = url.id
 
-    return handle_flash_messages(errors, is_duplicate, url_id)
+    return handle_flash_messages(has_errors, is_duplicate, url_id)
 
 
-def handle_flash_messages(errors: list, is_duplicate: bool, url_id: int):
-    """"Processes flash messages to notify about errors or success."""
-    if errors:
+def handle_flash_messages(has_errors: bool, is_duplicate: bool, url_id: int):
+    """Processes flash messages to notify about errors or success."""
+    if has_errors:
         flash('Некорректный URL', 'alert-danger')
         return render_template('index.html'), 422
 
@@ -71,7 +68,7 @@ def handle_flash_messages(errors: list, is_duplicate: bool, url_id: int):
         flash('Страница уже существует', 'alert-warning')
         return redirect(url_for('get_one_url', id=url_id))
 
-    if url_id is not None:
+    if url_id:
         flash('Страница успешно добавлена', 'alert-success')
         return redirect(url_for('get_one_url', id=url_id))
 
@@ -91,18 +88,17 @@ def handle_get_one_url(id: int):
 def check_and_add_url_check(id: int):
     """Checks and adds a check for the URL with the passed ID."""
     url = find_by_id(id)
-    status_code, h1, title, description, error = check_url_status(url)
-
-    if error:
-        return {'error': error}
-
-    add_check(id, status_code, h1, title, description)
-    return {
-        'status_code': status_code,
-        'h1': h1,
-        'title': title,
-        'description': description
-    }
+    try:
+        status_code, h1, title, description = check_url_status(url)
+        add_check(id, status_code, h1, title, description)
+        return {
+            'status_code': status_code,
+            'h1': h1,
+            'title': title,
+            'description': description
+        }
+    except requests.exceptions.RequestException as e:
+        return {'error': str(e)}
 
 
 def flash_message(result):
