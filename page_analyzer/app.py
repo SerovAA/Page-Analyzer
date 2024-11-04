@@ -11,7 +11,7 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 
 @app.route('/')
-def get_index():
+def get_index() -> str:
     """Displays the main page."""
     return render_template('index.html')
 
@@ -25,14 +25,14 @@ def get_urls_post(cursor):
 
 
 @app.route('/urls', methods=['GET'])
-def get_urls():
+def get_urls() -> str:
     """Displays a list of all URLs from the database."""
     urls = find_all_urls()
     return render_template('urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>', methods=['GET'])
-def get_one_url(id: int):
+def get_one_url(id: int) -> str:
     """Displays information about a specific URL by its ID."""
     url = handle_get_one_url(id)
     if url is None:
