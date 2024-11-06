@@ -1,12 +1,14 @@
 import psycopg2
 import requests
 from flask import render_template, flash, redirect, url_for
+from typing import Optional, Tuple, Dict, Union
 from .database import (add_url, find_by_name, find_by_id, add_check)
 from .url_check import validate_url, normalize_url
 from .parser import get_seo_data
 
 
-def process_url(url_from_request: str, cursor):
+def process_url(url_from_request: str, cursor) \
+        -> Tuple[Optional[dict], Optional[list]]:
     """
     Processes the URL, checking it for
     errors and adding it to the database.
@@ -24,7 +26,7 @@ def process_url(url_from_request: str, cursor):
         return find_by_name(new_url), None
 
 
-def check_url_status(url):
+def check_url_status(url) -> Tuple[int, str, str, str]:
     """Checks the status of the passed URL, returning SEO data."""
     response = requests.get(url.name)
     response.raise_for_status()
@@ -32,7 +34,8 @@ def check_url_status(url):
     return response.status_code, h1, title, description
 
 
-def process_url_submission(cursor, url_from_request: str):
+def process_url_submission(cursor, url_from_request: str) \
+        -> Tuple[Union[str, None], int]:
     """
     Processes the submitted URL, checking it
     and adding it to the database if there are no duplicates.
@@ -58,7 +61,8 @@ def process_url_submission(cursor, url_from_request: str):
     return handle_flash_messages(has_errors, is_duplicate, url_id)
 
 
-def handle_flash_messages(has_errors: bool, is_duplicate: bool, url_id: int):
+def handle_flash_messages(has_errors: bool, is_duplicate: bool,
+                          url_id: Optional[int]) -> Tuple[str, int]:
     """Processes flash messages to notify about errors or success."""
     if has_errors:
         flash('Некорректный URL', 'alert-danger')
@@ -76,7 +80,7 @@ def handle_flash_messages(has_errors: bool, is_duplicate: bool, url_id: int):
     return render_template('index.html'), 500
 
 
-def handle_get_one_url(id: int):
+def handle_get_one_url(id: int) -> Optional[dict]:
     """Returns a URL by ID or notifies if the URL is not found."""
     url = find_by_id(id)
     if url is None:
@@ -85,7 +89,7 @@ def handle_get_one_url(id: int):
     return url
 
 
-def check_and_add_url_check(id: int):
+def check_and_add_url_check(id: int) -> Dict[str, Union[str, int]]:
     """Checks and adds a check for the URL with the passed ID."""
     url = find_by_id(id)
     try:
@@ -101,11 +105,10 @@ def check_and_add_url_check(id: int):
         return {'error': str(e)}
 
 
-def flash_message(result):
+def flash_message(result: Dict[str, Union[str, int]]) -> None:
     """Generates a flash message based on the result of the URL check."""
     if 'error' in result:
         flash(f'Произошла ошибка при проверке: '
               f'{result["error"]}', 'alert-danger')
-
     else:
         flash('Страница успешно проверена', 'alert-success')

@@ -1,9 +1,15 @@
 from datetime import datetime
+from typing import List, Tuple, Optional, Dict, Any
 from .db_decorators import use_connection
 
 
 @use_connection
-def find_all_urls(cursor):
+def find_all_urls(cursor) -> List[Tuple[
+    int,
+    str,
+    Optional[datetime],
+    Optional[int]
+]]:
     """
     Returns all URLs from the database with
     information about the last check.
@@ -23,21 +29,21 @@ def find_all_urls(cursor):
 
 
 @use_connection
-def find_by_id(cursor, id: int):
+def find_by_id(cursor, id: int) -> Optional[Dict[str, Any]]:
     """Finds URL by ID."""
     cursor.execute("SELECT * FROM urls WHERE id = %s", (id,))
     return cursor.fetchone()
 
 
 @use_connection
-def find_by_name(cursor, name: str):
+def find_by_name(cursor, name: str) -> Optional[Dict[str, Any]]:
     """Finds URL by name."""
     cursor.execute("SELECT * FROM urls WHERE name = %s", (name,))
     return cursor.fetchone()
 
 
 @use_connection
-def find_checks(cursor, url_id: int):
+def find_checks(cursor, url_id: int) -> List[Dict[str, Any]]:
     """Returns all checks for the specified URL by ID."""
     cursor.execute(
         """
@@ -51,8 +57,8 @@ def find_checks(cursor, url_id: int):
 
 
 @use_connection
-def add_check(cursor, id: int, status_code: int,
-              h1: str, title: str, description: str):
+def add_check(cursor, id: int, status_code: int, h1: str,
+              title: str, description: str) -> None:
     """Adds a verification record for a URL to the database."""
     cursor.execute(
         """
@@ -65,7 +71,7 @@ def add_check(cursor, id: int, status_code: int,
     )
 
 
-def add_url(cursor, new_url: str):
+def add_url(cursor, new_url: str) -> Optional[Dict[str, Any]]:
     """Adds a new URL to the database and returns its ID."""
     cursor.execute(
         """

@@ -6,6 +6,7 @@ from .url_service import (handle_get_one_url,
                           check_and_add_url_check,
                           process_url_submission,
                           flash_message)
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -18,7 +19,7 @@ def get_index() -> str:
 
 @app.route('/urls', methods=['POST'])
 @use_connection
-def get_urls_post(cursor):
+def get_urls_post(cursor) -> str:
     """Processes the URL submission and adds it to the database."""
     url_from_request = request.form.to_dict().get('url', '')
     return process_url_submission(cursor, url_from_request)
@@ -44,7 +45,7 @@ def get_one_url(id: int) -> str:
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
-def check_url(id: int):
+def check_url(id: int) -> str:
     """
     Runs a URL availability check and adds the result to the database.
     """
