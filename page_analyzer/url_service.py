@@ -1,7 +1,7 @@
 import psycopg2
 import requests
 from flask import render_template, flash, redirect, url_for
-from typing import Optional, Tuple, Dict, Union
+from typing import List, Optional, Tuple, Dict, Union
 from .database import (add_url, find_by_name, find_by_id, add_check)
 from .url_check import validate_url, normalize_url
 from .parser import get_seo_data
@@ -40,11 +40,11 @@ def process_url_submission(cursor, url_from_request: str) \
     Processes the submitted URL, checking it
     and adding it to the database if there are no duplicates.
     """
-    has_errors = bool(validate_url(url_from_request))
+    errors = validate_url(url_from_request)
     url_id = None
     is_duplicate = False
 
-    if not has_errors:
+    if not errors:
         new_url = normalize_url(url_from_request)
         try:
             add_url(cursor, new_url)
@@ -58,14 +58,15 @@ def process_url_submission(cursor, url_from_request: str) \
             if url:
                 url_id = url.id
 
-    return handle_flash_messages(has_errors, is_duplicate, url_id)
+    return handle_flash_messages(errors, is_duplicate, url_id)
 
 
-def handle_flash_messages(has_errors: bool, is_duplicate: bool,
+def handle_flash_messages(errors: List[str], is_duplicate: bool,
                           url_id: Optional[int]) -> Tuple[str, int]:
     """Processes flash messages to notify about errors or success."""
-    if has_errors:
-        flash('Некорректный URL', 'alert-danger')
+    if errors:
+        for error in errors:
+            flash(error, 'alert-danger')
         return render_template('index.html'), 422
 
     if is_duplicate:

@@ -3,13 +3,17 @@ from urllib.parse import urlparse
 from typing import List
 
 MAX_URL_LEN = 255
+ERROR_INVALID_URL = "Некорректный URL"
+ERROR_TOO_LONG_URL = "Слишком длинный URL"
 
 
 def validate_url(url: str) -> List[str]:
-    """Checks URL for correctness and length."""
+    """Validates URL correctness and length, returning error codes."""
     errors = []
-    if not validators.url(url) or len(url) > MAX_URL_LEN:
-        errors.append('Некорректный URL')
+    if not validators.url(url):
+        errors.append(ERROR_INVALID_URL)
+    elif len(url) > MAX_URL_LEN:
+        errors.append(ERROR_TOO_LONG_URL)
     return errors
 
 
