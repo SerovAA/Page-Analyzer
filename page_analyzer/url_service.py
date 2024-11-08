@@ -7,15 +7,14 @@ from .url_check import validate_url, normalize_url
 from .parser import get_seo_data
 
 
-def process_url(url_from_request: str, cursor) \
-        -> Tuple[Optional[dict], Optional[list]]:
+def process_url(url_from_request: str, cursor) -> Tuple[Optional[dict], Optional[list]]:
     """
     Processes the URL, checking it for
     errors and adding it to the database.
     """
-    errors = validate_url(url_from_request)
-    if errors:
-        return None, errors
+    result = validate_url(url_from_request)
+    if result.errors:
+        return None, result.errors
 
     new_url = normalize_url(url_from_request)
 
@@ -40,11 +39,11 @@ def process_url_submission(cursor, url_from_request: str) \
     Processes the submitted URL, checking it
     and adding it to the database if there are no duplicates.
     """
-    errors = validate_url(url_from_request)
+    result = validate_url(url_from_request)
     url_id = None
     is_duplicate = False
 
-    if not errors:
+    if not result.errors:
         new_url = normalize_url(url_from_request)
         try:
             add_url(cursor, new_url)
@@ -58,7 +57,7 @@ def process_url_submission(cursor, url_from_request: str) \
             if url:
                 url_id = url.id
 
-    return handle_flash_messages(errors, is_duplicate, url_id)
+    return handle_flash_messages(result.errors, is_duplicate, url_id)
 
 
 def handle_flash_messages(errors: List[str], is_duplicate: bool,
