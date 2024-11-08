@@ -39,9 +39,10 @@ def get_one_url(id: int) -> str:
     if url is None:
         return redirect(url_for('get_index'))
 
+    checks = find_checks(id)
     return render_template('show.html', ID=id, name=url.name,
                            created_at=url.created_at,
-                           checks=find_checks(id))
+                           checks=checks)
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])

@@ -64,10 +64,9 @@ def add_check(cursor, id: int, status_code: int, h1: str,
         """
         INSERT INTO url_checks (url_id, status_code, h1,
         title, description, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, NOW()::timestamp(0))
         """,
-        (id, status_code, h1, title, description,
-         datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        (id, status_code, h1, title, description)
     )
 
 
@@ -76,8 +75,8 @@ def add_url(cursor, new_url: str) -> Optional[Dict[str, Any]]:
     cursor.execute(
         """
         INSERT INTO urls (name, created_at)
-        VALUES (%s, %s) RETURNING id
+        VALUES (%s, NOW()::timestamp(0)) RETURNING id
         """,
-        (new_url, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        (new_url,)
     )
     return cursor.fetchone()
