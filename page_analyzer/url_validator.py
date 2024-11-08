@@ -29,8 +29,9 @@ class URLValidationResult:
 def validate_url(url: str) -> URLValidationResult:
     """Validates URL correctness and length, returning error codes."""
     result = URLValidationResult()
+    parsed_url = urlparse(url)
 
-    if not validators.url(url):
+    if not validators.url(url) and not parsed_url.netloc:
         result.add_error(result.error_invalid_url)
 
     if len(url) > result.max_url_len:

@@ -6,7 +6,7 @@
 
 **Анализатор страниц** – это веб-сайт, который анализирует веб-страницы на предмет пригодности для SEO.
 
-Посмотреть работы на [render.com](``https://python-project-83-s1tt.onrender.com``)
+Посмотреть работы на [render.com](https://python-project-83-s1tt.onrender.com)
 ---
 
 ## Установка
