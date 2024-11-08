@@ -2,9 +2,9 @@ from flask import Flask, request, render_template, redirect, url_for
 from .config import SECRET_KEY
 from .database import find_all_urls, find_checks
 from .db_decorators import use_connection
-from .url_service import (handle_get_one_url,
-                          check_and_add_url_check,
-                          flash_message, set_flash_messages)
+from .flash_messages import flash_message, handle_get_one_url
+from .url_check import check_and_add_url_check
+from .url_processing import set_flash_messages
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY

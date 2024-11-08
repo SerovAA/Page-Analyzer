@@ -1,45 +1,28 @@
-import validators
-from urllib.parse import urlparse
-from typing import List
-from dataclasses import dataclass
+import requests
+from typing import Dict, Union, Tuple
+from .database import add_check, find_by_id
+from .parser import get_seo_data
 
 
-@dataclass
-class URLValidationResult:
-    max_url_len: int = 255
-    error_invalid_url: str = "Некорректный URL"
-    error_too_long_url: str = "Слишком длинный URL"
-    errors: List[str] = None
-
-    def __init__(self, max_url_len: int = 255,
-                 error_invalid_url: str = "Некорректный URL",
-                 error_too_long_url: str = "Слишком длинный URL"):
-        self.max_url_len = max_url_len
-        self.error_invalid_url = error_invalid_url
-        self.error_too_long_url = error_too_long_url
-        self.errors = []
-
-    def add_error(self, error: str):
-        self.errors.append(error)
-
-    def is_valid(self) -> bool:
-        return len(self.errors) == 0
+def check_url_status(url) -> Tuple[int, str, str, str]:
+    """Checks the status of the passed URL, returning SEO data."""
+    response = requests.get(url.name)
+    response.raise_for_status()
+    h1, title, description = get_seo_data(response.text)
+    return response.status_code, h1, title, description
 
 
-def validate_url(url: str) -> URLValidationResult:
-    """Validates URL correctness and length, returning error codes."""
-    result = URLValidationResult()
-
-    if not validators.url(url):
-        result.add_error(result.error_invalid_url)
-
-    if len(url) > result.max_url_len:
-        result.add_error(result.error_too_long_url)
-
-    return result
-
-
-def normalize_url(url: str) -> str:
-    """Converts URL to standard form."""
-    parsed_url = urlparse(url)
-    return f'{parsed_url.scheme}://{parsed_url.netloc}'
+def check_and_add_url_check(id: int) -> Dict[str, Union[str, int]]:
+    """Checks and adds a check for the URL with the passed ID."""
+    url = find_by_id(id)
+    try:
+        status_code, h1, title, description = check_url_status(url)
+        add_check(id, status_code, h1, title, description)
+        return {
+            'status_code': status_code,
+            'h1': h1,
+            'title': title,
+            'description': description
+        }
+    except requests.exceptions.RequestException as e:
+        return {'error': str(e)}
