@@ -10,11 +10,10 @@ from .parser import get_seo_data
 def process_url(url_from_request: str, cursor) \
         -> Tuple[Optional[dict], Optional[list]]:
     """
-    Processes the URL, checking it for
-    errors and adding it to the database.
+    Processes the URL, checking it for errors and adding it to the database.
     """
     result = validate_url(url_from_request)
-    if result.errors:
+    if not result.is_valid():
         return None, result.errors
 
     new_url = normalize_url(url_from_request)
@@ -44,7 +43,7 @@ def process_url_submission(cursor, url_from_request: str) \
     url_id = None
     is_duplicate = False
 
-    if not result.errors:
+    if result.is_valid():
         new_url = normalize_url(url_from_request)
         try:
             add_url(cursor, new_url)
@@ -61,7 +60,8 @@ def process_url_submission(cursor, url_from_request: str) \
     return result.errors, is_duplicate, url_id
 
 
-def handle_flash_messages(errors: List[str], is_duplicate: bool,
+def handle_flash_messages(errors: List[str],
+                          is_duplicate: bool,
                           url_id: Optional[int]) -> None:
     """Handles flash messages for URL submission."""
     if errors:

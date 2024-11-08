@@ -3,16 +3,20 @@ from urllib.parse import urlparse
 from typing import List
 from dataclasses import dataclass
 
-MAX_URL_LEN = 255
-ERROR_INVALID_URL = "Некорректный URL"
-ERROR_TOO_LONG_URL = "Слишком длинный URL"
-
 
 @dataclass
 class URLValidationResult:
-    errors: List[str]
+    max_url_len: int = 255
+    error_invalid_url: str = "Некорректный URL"
+    error_too_long_url: str = "Слишком длинный URL"
+    errors: List[str] = None
 
-    def __init__(self):
+    def __init__(self, max_url_len: int = 255,
+                 error_invalid_url: str = "Некорректный URL",
+                 error_too_long_url: str = "Слишком длинный URL"):
+        self.max_url_len = max_url_len
+        self.error_invalid_url = error_invalid_url
+        self.error_too_long_url = error_too_long_url
         self.errors = []
 
     def add_error(self, error: str):
@@ -27,10 +31,10 @@ def validate_url(url: str) -> URLValidationResult:
     result = URLValidationResult()
 
     if not validators.url(url):
-        result.add_error(ERROR_INVALID_URL)
+        result.add_error(result.error_invalid_url)
 
-    if len(url) > MAX_URL_LEN:
-        result.add_error(ERROR_TOO_LONG_URL)
+    if len(url) > result.max_url_len:
+        result.add_error(result.error_too_long_url)
 
     return result
 
