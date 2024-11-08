@@ -7,7 +7,8 @@ from .url_check import validate_url, normalize_url
 from .parser import get_seo_data
 
 
-def process_url(url_from_request: str, cursor) -> Tuple[Optional[dict], Optional[list]]:
+def process_url(url_from_request: str, cursor) \
+        -> Tuple[Optional[dict], Optional[list]]:
     """
     Processes the URL, checking it for
     errors and adding it to the database.
@@ -34,7 +35,7 @@ def check_url_status(url) -> Tuple[int, str, str, str]:
 
 
 def process_url_submission(cursor, url_from_request: str) \
-        -> Tuple[Union[str, None], int]:
+        -> Tuple[List[str], bool, Optional[int]]:
     """
     Processes the submitted URL, checking it
     and adding it to the database if there are no duplicates.
@@ -57,26 +58,38 @@ def process_url_submission(cursor, url_from_request: str) \
             if url:
                 url_id = url.id
 
-    return handle_flash_messages(result.errors, is_duplicate, url_id)
+    return result.errors, is_duplicate, url_id
 
 
 def handle_flash_messages(errors: List[str], is_duplicate: bool,
-                          url_id: Optional[int]) -> Tuple[str, int]:
-    """Processes flash messages to notify about errors or success."""
+                          url_id: Optional[int]) -> None:
+    """Handles flash messages for URL submission."""
     if errors:
         for error in errors:
             flash(error, 'alert-danger')
-        return render_template('index.html'), 422
-
-    if is_duplicate:
+    elif is_duplicate:
         flash('Страница уже существует', 'alert-warning')
-        return redirect(url_for('get_one_url', id=url_id))
-
-    if url_id:
+    elif url_id:
         flash('Страница успешно добавлена', 'alert-success')
+    else:
+        flash('Произошла ошибка при добавлении URL', 'alert-danger')
+
+
+def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
+    """
+    Process the URL submission, handle flash messages, and return response.
+    """
+    url_from_request = form_data.get('url', '')
+    errors, is_duplicate, url_id = (
+        process_url_submission(cursor, url_from_request))
+
+    handle_flash_messages(errors, is_duplicate, url_id)
+
+    if errors:
+        return render_template('index.html'), 422
+    if is_duplicate or url_id:
         return redirect(url_for('get_one_url', id=url_id))
 
-    flash('Произошла ошибка при добавлении URL', 'alert-danger')
     return render_template('index.html'), 500
 
 

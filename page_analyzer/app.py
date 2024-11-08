@@ -4,8 +4,7 @@ from .database import find_all_urls, find_checks
 from .db_decorators import use_connection
 from .url_service import (handle_get_one_url,
                           check_and_add_url_check,
-                          process_url_submission,
-                          flash_message)
+                          flash_message, set_flash_messages)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -20,9 +19,11 @@ def get_index() -> str:
 @app.route('/urls', methods=['POST'])
 @use_connection
 def get_urls_post(cursor) -> str:
-    """Processes the URL submission and adds it to the database."""
-    url_from_request = request.form.to_dict().get('url', '')
-    return process_url_submission(cursor, url_from_request)
+    """
+    Handles the URL submission and redirects
+    or renders based on the result.
+    """
+    return set_flash_messages(cursor, request.form.to_dict())
 
 
 @app.route('/urls', methods=['GET'])
