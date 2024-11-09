@@ -1,7 +1,7 @@
 import psycopg2
 from flask import render_template, redirect, url_for
 from typing import List, Optional, Tuple
-from page_analyzer.database import (add_url, find_by_name)
+from page_analyzer.db_operators.database import add_url, find_by_name
 from page_analyzer.url_check import validate_url, normalize_url
 from page_analyzer.url_services.flash_messages import handle_flash_messages
 
@@ -10,7 +10,7 @@ def process_url_submission(cursor, url_from_request: str) \
         -> Tuple[List[str], bool, Optional[int]]:
     """
     Processes the submitted URL, checking it
-    and adding it to the database if there are no duplicates.
+    and adding it to the db_operators if there are no duplicates.
     """
     result = validate_url(url_from_request)
     url_id = None

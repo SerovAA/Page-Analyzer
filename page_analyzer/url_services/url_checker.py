@@ -1,6 +1,6 @@
 import requests
 from typing import Tuple, Dict, Union
-from page_analyzer.database import (find_by_id, add_check)
+from page_analyzer.db_operators.database import find_by_id, add_check
 from page_analyzer.parser import get_seo_data
 
 

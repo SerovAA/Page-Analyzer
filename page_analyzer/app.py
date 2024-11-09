@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 from .config import SECRET_KEY
-from .database import find_all_urls, find_checks
-from .db_decorators import use_connection
+from page_analyzer.db_operators.database import find_all_urls, find_checks
+from page_analyzer.db_operators.db_decorators import use_connection
 from page_analyzer.url_services.url_processing import set_flash_messages
 from page_analyzer.url_services.flash_messages import (handle_get_one_url,
                                                        flash_message)
@@ -29,7 +29,7 @@ def get_urls_post(cursor) -> str:
 
 @app.route('/urls', methods=['GET'])
 def get_urls() -> str:
-    """Displays a list of all URLs from the database."""
+    """Displays a list of all URLs from the db_operators."""
     urls = find_all_urls()
     return render_template('urls.html', urls=urls)
 
@@ -50,7 +50,7 @@ def get_one_url(id: int) -> str:
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id: int) -> str:
     """
-    Runs a URL availability check and adds the result to the database.
+    Runs a URL availability check and adds the result to the db_operators.
     """
     result = check_and_add_url_check(id)
     flash_message(result)

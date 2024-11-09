@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Tuple, Optional, Dict, Any
-from .db_decorators import use_connection
+from page_analyzer.db_operators.db_decorators import use_connection
 
 
 @use_connection
@@ -11,7 +11,7 @@ def find_all_urls(cursor) -> List[Tuple[
     Optional[int]
 ]]:
     """
-    Returns all URLs from the database with
+    Returns all URLs from the db_operators with
     information about the last check.
     """
     cursor.execute(
@@ -59,7 +59,7 @@ def find_checks(cursor, url_id: int) -> List[Dict[str, Any]]:
 @use_connection
 def add_check(cursor, id: int, status_code: int, h1: str,
               title: str, description: str) -> None:
-    """Adds a verification record for a URL to the database."""
+    """Adds a verification record for a URL to the db_operators."""
     cursor.execute(
         """
         INSERT INTO url_checks (url_id, status_code, h1,
@@ -71,7 +71,7 @@ def add_check(cursor, id: int, status_code: int, h1: str,
 
 
 def add_url(cursor, new_url: str) -> Optional[Dict[str, Any]]:
-    """Adds a new URL to the database and returns its ID."""
+    """Adds a new URL to the db_operators and returns its ID."""
     cursor.execute(
         """
         INSERT INTO urls (name, created_at)

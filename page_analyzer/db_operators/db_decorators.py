@@ -1,11 +1,11 @@
 import psycopg2
-from .config import DATABASE_URL
+from page_analyzer.config import DATABASE_URL
 from psycopg2.extras import NamedTupleCursor
 from typing import Callable, Any
 
 
 def get_connection() -> psycopg2.extensions.connection:
-    """Creates a connection to a database."""
+    """Creates a connection to a db_operators."""
     return psycopg2.connect(DATABASE_URL)
 
 

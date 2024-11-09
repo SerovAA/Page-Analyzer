@@ -1,6 +1,6 @@
 from flask import flash
 from typing import List, Optional, Dict, Union
-from page_analyzer.database import find_by_id
+from page_analyzer.db_operators.database import find_by_id
 
 
 def handle_flash_messages(errors: List[str],
