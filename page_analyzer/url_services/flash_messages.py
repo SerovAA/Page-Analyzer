@@ -1,15 +1,14 @@
 from flask import flash
-from typing import List, Optional, Dict, Union
+from typing import Optional, Dict, Union
 from page_analyzer.db_operators.database import find_by_id
 
 
-def handle_flash_messages(errors: List[str],
+def handle_flash_messages(error_message: Optional[str],
                           is_duplicate: bool,
                           url_id: Optional[int]) -> None:
     """Handles flash messages for URL submission."""
-    if errors:
-        for error in errors:
-            flash(error, 'alert-danger')
+    if error_message:
+        flash(error_message, 'alert-danger')
     elif is_duplicate:
         flash('Страница уже существует', 'alert-warning')
     elif url_id:
