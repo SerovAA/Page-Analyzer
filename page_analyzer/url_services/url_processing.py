@@ -1,28 +1,9 @@
 import psycopg2
-from flask import render_template, flash, redirect, url_for
-from typing import List, Optional, Tuple, Dict, Union
-from .database import (add_url, find_by_name)
-from .url_check import validate_url, normalize_url
-
+from flask import render_template, redirect, url_for
+from typing import List, Optional, Tuple
+from page_analyzer.database import (add_url, find_by_name)
+from page_analyzer.url_check import validate_url, normalize_url
 from page_analyzer.url_services.flash_messages import handle_flash_messages
-
-
-def process_url(url_from_request: str, cursor) \
-        -> Tuple[Optional[dict], Optional[list]]:
-    """
-    Processes the URL, checking it for errors and adding it to the database.
-    """
-    result = validate_url(url_from_request)
-    if not result.is_valid():
-        return None, result.errors
-
-    new_url = normalize_url(url_from_request)
-
-    try:
-        url_info = add_url(cursor, new_url)
-        return url_info, None
-    except psycopg2.errors.UniqueViolation:
-        return find_by_name(new_url), None
 
 
 def process_url_submission(cursor, url_from_request: str) \
@@ -68,12 +49,3 @@ def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
         return redirect(url_for('get_one_url', id=url_id))
 
     return render_template('index.html'), 500
-
-
-def flash_message(result: Dict[str, Union[str, int]]) -> None:
-    """Generates a flash message based on the result of the URL check."""
-    if 'error' in result:
-        flash(f'Произошла ошибка при проверке: '
-              f'{result["error"]}', 'alert-danger')
-    else:
-        flash('Страница успешно проверена', 'alert-success')
