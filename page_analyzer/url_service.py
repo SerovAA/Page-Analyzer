@@ -1,10 +1,8 @@
 import psycopg2
-import requests
 from flask import render_template, flash, redirect, url_for
 from typing import List, Optional, Tuple, Dict, Union
-from .database import (add_url, find_by_name, find_by_id, add_check)
+from .database import (add_url, find_by_name)
 from .url_check import validate_url, normalize_url
-from .parser import get_seo_data
 
 from page_analyzer.url_services.flash_messages import handle_flash_messages
 
@@ -25,14 +23,6 @@ def process_url(url_from_request: str, cursor) \
         return url_info, None
     except psycopg2.errors.UniqueViolation:
         return find_by_name(new_url), None
-
-
-def check_url_status(url) -> Tuple[int, str, str, str]:
-    """Checks the status of the passed URL, returning SEO data."""
-    response = requests.get(url.name)
-    response.raise_for_status()
-    h1, title, description = get_seo_data(response.text)
-    return response.status_code, h1, title, description
 
 
 def process_url_submission(cursor, url_from_request: str) \
@@ -78,22 +68,6 @@ def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
         return redirect(url_for('get_one_url', id=url_id))
 
     return render_template('index.html'), 500
-
-
-def check_and_add_url_check(id: int) -> Dict[str, Union[str, int]]:
-    """Checks and adds a check for the URL with the passed ID."""
-    url = find_by_id(id)
-    try:
-        status_code, h1, title, description = check_url_status(url)
-        add_check(id, status_code, h1, title, description)
-        return {
-            'status_code': status_code,
-            'h1': h1,
-            'title': title,
-            'description': description
-        }
-    except requests.exceptions.RequestException as e:
-        return {'error': str(e)}
 
 
 def flash_message(result: Dict[str, Union[str, int]]) -> None:
