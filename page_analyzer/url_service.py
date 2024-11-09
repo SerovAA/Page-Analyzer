@@ -6,6 +6,8 @@ from .database import (add_url, find_by_name, find_by_id, add_check)
 from .url_check import validate_url, normalize_url
 from .parser import get_seo_data
 
+from page_analyzer.url_services.flash_messages import handle_flash_messages
+
 
 def process_url(url_from_request: str, cursor) \
         -> Tuple[Optional[dict], Optional[list]]:
@@ -60,21 +62,6 @@ def process_url_submission(cursor, url_from_request: str) \
     return result.errors, is_duplicate, url_id
 
 
-def handle_flash_messages(errors: List[str],
-                          is_duplicate: bool,
-                          url_id: Optional[int]) -> None:
-    """Handles flash messages for URL submission."""
-    if errors:
-        for error in errors:
-            flash(error, 'alert-danger')
-    elif is_duplicate:
-        flash('Страница уже существует', 'alert-warning')
-    elif url_id:
-        flash('Страница успешно добавлена', 'alert-success')
-    else:
-        flash('Произошла ошибка при добавлении URL', 'alert-danger')
-
-
 def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
     """
     Process the URL submission, handle flash messages, and return response.
@@ -91,15 +78,6 @@ def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
         return redirect(url_for('get_one_url', id=url_id))
 
     return render_template('index.html'), 500
-
-
-def handle_get_one_url(id: int) -> Optional[dict]:
-    """Returns a URL by ID or notifies if the URL is not found."""
-    url = find_by_id(id)
-    if url is None:
-        flash('Такой страницы не существует', 'alert-warning')
-        return None
-    return url
 
 
 def check_and_add_url_check(id: int) -> Dict[str, Union[str, int]]:
