@@ -1,19 +1,10 @@
 import validators
 from urllib.parse import urlparse
+from exceptions import InvalidURLError, URLTooLongError
 
 MAX_URL_LEN = 255
 ERROR_INVALID_URL = "Некорректный URL"
 ERROR_TOO_LONG_URL = "Слишком длинный URL"
-
-
-class InvalidURLError(Exception):
-    """Raised when the URL is invalid."""
-    pass
-
-
-class URLTooLongError(Exception):
-    """Raised when the URL exceeds the maximum allowed length."""
-    pass
 
 
 def validate_url(url: str) -> None:
