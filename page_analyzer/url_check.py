@@ -1,6 +1,6 @@
 import validators
 from urllib.parse import urlparse
-from exceptions import InvalidURLError, URLTooLongError
+from page_analyzer.exceptions import InvalidURLError, URLTooLongError
 
 MAX_URL_LEN = 255
 ERROR_INVALID_URL = "Некорректный URL"

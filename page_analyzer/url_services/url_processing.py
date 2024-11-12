@@ -2,9 +2,9 @@ import psycopg2
 from flask import render_template, redirect, url_for
 from typing import Optional, Tuple
 from page_analyzer.db_operators.database import add_url, find_by_name
-from page_analyzer.url_check import (validate_url, normalize_url,
-                                     InvalidURLError, URLTooLongError)
+from page_analyzer.url_check import validate_url, normalize_url
 from page_analyzer.url_services.flash_messages import handle_flash_messages
+from page_analyzer.exceptions import InvalidURLError, URLTooLongError
 
 
 def process_url_submission(cursor, url_from_request: str) \
