@@ -13,9 +13,6 @@ def process_url_submission(cursor, url_from_request: str) \
     Processes the submitted URL, validating it
     and attempting to add it to the database if unique.
     """
-
-    new_url = ""
-
     try:
         validate_url(url_from_request)
         new_url = normalize_url(url_from_request)
@@ -51,4 +48,4 @@ def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
     if is_duplicate or url_id:
         return redirect(url_for('get_one_url', id=url_id))
     else:
-        return render_template('index.html'), 500
+        return render_template('index.html'), 422
