@@ -29,7 +29,6 @@ def handle_get_one_url(id: int) -> Optional[dict]:
 def flash_message(result: Dict[str, Union[str, int]]) -> None:
     """Generates a flash message based on the result of the URL check."""
     if 'error' in result:
-        flash(f'Произошла ошибка при проверке: '
-              f'{result["error"]}', 'alert-danger')
+        flash(f'Произошла ошибка при проверке', 'alert-danger')
     else:
         flash('Страница успешно проверена', 'alert-success')
