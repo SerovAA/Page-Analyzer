@@ -3,10 +3,13 @@ from typing import Optional, Dict, Union
 from page_analyzer.db_operators.database import find_by_id
 
 
-def handle_flash_messages(is_duplicate: bool,
+def handle_flash_messages(error_message: Optional[str],
+                          is_duplicate: bool,
                           url_id: Optional[int]) -> None:
     """Handles flash messages for URL submission."""
-    if is_duplicate:
+    if error_message:
+        flash(error_message, 'alert-danger')
+    elif is_duplicate:
         flash('Страница уже существует', 'alert-warning')
     elif url_id:
         flash('Страница успешно добавлена', 'alert-success')
