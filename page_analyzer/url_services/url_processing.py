@@ -13,6 +13,9 @@ def process_url_submission(cursor, url_from_request: str) \
     Processes the submitted URL, validating it
     and attempting to add it to the database if unique.
     """
+
+    new_url = ""
+
     try:
         validate_url(url_from_request)
         new_url = normalize_url(url_from_request)
@@ -32,7 +35,6 @@ def process_url_submission(cursor, url_from_request: str) \
         url = find_by_name(new_url)
         if url:
             return url.id, True
-
 
 
 def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
