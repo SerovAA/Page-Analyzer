@@ -13,31 +13,29 @@ def process_url_submission(cursor, url_from_request: str) \
     Processes the submitted URL, validating it
     and attempting to add it to the database if unique.
     """
-    url_id = None
-    is_duplicate = False
-    error_message = None
 
     try:
         validate_url(url_from_request)
         new_url = normalize_url(url_from_request)
-
         add_url(cursor, new_url)
+
         cursor.execute("SELECT * FROM urls WHERE name = %s", (new_url,))
         url_info = cursor.fetchone()
         if url_info:
-            url_id = url_info.id
+            return None, url_info.id, False
 
-    except InvalidURLError as e:
-        error_message = str(e)
-    except URLTooLongError as e:
-        error_message = str(e)
+    except InvalidURLError:
+        return "Invalid URL", None, False
+
+    except URLTooLongError:
+        return "Invalid URL", None, False
+
     except psycopg2.errors.UniqueViolation:
-        is_duplicate = True
         url = find_by_name(new_url)
         if url:
-            url_id = url.id
+            return None, url.id, True
 
-    return error_message, is_duplicate, url_id
+    return "An error occurred", None, False
 
 
 def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
@@ -46,7 +44,7 @@ def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
     and determines the appropriate response
     """
     url_from_request = form_data.get('url', '')
-    error_message, is_duplicate, url_id = (
+    error_message, url_id, is_duplicate = (
         process_url_submission(cursor, url_from_request))
 
     handle_flash_messages(error_message, is_duplicate, url_id)
