@@ -1,4 +1,3 @@
-from page_analyzer.db_operators.database import URLRepository
 from page_analyzer.parser import get_seo_data
 import requests
 from typing import Tuple, Dict, Union, Any
@@ -12,7 +11,7 @@ def check_url_status(url) -> Tuple[int, str, str, str]:
     return response.status_code, h1, title, description
 
 
-def check_and_add_url_check(url_repo: URLRepository, url: Dict[str, Any]) \
+def check_and_add_url_check(url_repo, url: Dict[str, Any]) \
         -> Dict[str, Union[str, int]]:
     """Checks and adds a check for the URL."""
     if not url:
