@@ -46,15 +46,15 @@ def get_urls() -> str:
 def get_one_url(id: int) -> str:
     """Displays information about a specific URL by its ID."""
     db_connection = DatabaseConnection(DATABASE_URL)
-    url = handle_get_one_url(db_connection, id)
-    if url is None:
-        return redirect(url_for('get_index'))
 
     url_repository = URLRepository(db_connection)
+    url = url_repository.find_by_id(id)
+    url = handle_get_one_url(url)
+    if url is None:
+        return redirect(url_for('get_index'))
     checks = url_repository.find_checks(id)
     return render_template('show.html', ID=id, name=url.name,
-                           created_at=url.created_at,
-                           checks=checks)
+                           created_at=url.created_at, checks=checks)
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
