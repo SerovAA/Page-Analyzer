@@ -1,6 +1,7 @@
 from flask import flash
 from typing import Optional, Dict, Union
-from page_analyzer.db_operators.database import find_by_id
+from page_analyzer.db_operators.database import URLRepository
+from page_analyzer.db_operators.db_decorators import DatabaseConnection
 
 
 def handle_flash_messages(error_message: Optional[str],
@@ -17,9 +18,11 @@ def handle_flash_messages(error_message: Optional[str],
         flash('Произошла ошибка при добавлении URL', 'alert-danger')
 
 
-def handle_get_one_url(id: int) -> Optional[dict]:
+def handle_get_one_url(db_connection: DatabaseConnection, id: int) \
+        -> Optional[dict]:
     """Returns a URL by ID or notifies if the URL is not found."""
-    url = find_by_id(id)
+    url_repository = URLRepository(db_connection)
+    url = url_repository.find_by_id(id)
     if url is None:
         flash('Такой страницы не существует', 'alert-warning')
         return None

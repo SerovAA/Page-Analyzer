@@ -1,20 +1,29 @@
 import psycopg2
-from page_analyzer.config import DATABASE_URL
 from psycopg2.extras import NamedTupleCursor
-from typing import Callable, Any
 
 
-def get_connection() -> psycopg2.extensions.connection:
-    """Creates a connection to a db_operators."""
-    return psycopg2.connect(DATABASE_URL)
+class DatabaseConnection:
+    """Manages a reusable connection to the database."""
+    def __init__(self, database_url: str):
+        self.database_url = database_url
+        self.connection = self._create_connection()
 
+    def _create_connection(self) -> psycopg2.extensions.connection:
+        """Creates and returns a connection to the database."""
+        return psycopg2.connect(self.database_url)
 
-def use_connection(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator to provide connection and cursor."""
+    def get_cursor(self):
+        """Returns a cursor for executing queries."""
+        return self.connection.cursor(cursor_factory=NamedTupleCursor)
 
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        with (get_connection() as connection,
-              connection.cursor(cursor_factory=NamedTupleCursor) as cursor):
-            return func(cursor, *args, **kwargs)
+    def close(self):
+        """Closes the database connection."""
+        self.connection.close()
 
-    return wrapper
+    def commit(self):
+        """Commits the current transaction."""
+        self.connection.commit()
+
+    def rollback(self):
+        """Rolls back the current transaction."""
+        self.connection.rollback()
