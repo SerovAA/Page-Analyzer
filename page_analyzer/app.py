@@ -63,6 +63,8 @@ def check_url(id: int) -> str:
     Runs a URL availability check and adds the result to the db_operators.
     """
     db_connection = DatabaseConnection(DATABASE_URL)
-    result = check_and_add_url_check(db_connection, id)
+    url_repo = URLRepository(db_connection)
+    url = url_repo.find_by_id(id)
+    result = check_and_add_url_check(url_repo, url)
     flash_message(result)
     return redirect(url_for('get_one_url', id=id))
