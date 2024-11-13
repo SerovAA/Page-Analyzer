@@ -8,7 +8,7 @@ def handle_flash_messages(error_message: Optional[str],
                           url_id: Optional[int]) -> None:
     """Handles flash messages for URL submission."""
     if error_message:
-        flash(error_message, 'alert-danger')
+        flash('Некорректный URL', 'alert-danger')
     elif is_duplicate:
         flash('Страница уже существует', 'alert-warning')
     elif url_id:

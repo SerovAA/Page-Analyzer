@@ -44,6 +44,7 @@ def set_flash_messages(cursor, form_data: dict) -> Tuple[str, int]:
     and determines the appropriate response
     """
     url_from_request = form_data.get('url', '')
+
     error_message, url_id, is_duplicate = (
         process_url_submission(cursor, url_from_request))
 
