@@ -6,8 +6,10 @@ def handle_flash_messages(error_message: Optional[str],
                           is_duplicate: bool,
                           url_id: Optional[int]) -> None:
     """Handles flash messages for URL submission."""
-    if error_message:
+    if error_message == "Invalid URL":
         flash('Некорректный URL', 'alert-danger')
+    elif error_message == "URL too long":
+        flash('URL слишком длинный', 'alert-danger')
     elif is_duplicate:
         flash('Страница уже существует', 'alert-warning')
     elif url_id:

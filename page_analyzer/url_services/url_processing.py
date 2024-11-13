@@ -20,7 +20,7 @@ def process_url_submission(url_repo: URLRepository, url_from_request: str) \
     except InvalidURLError:
         return "Invalid URL", None, False
     except URLTooLongError:
-        return "Invalid URL", None, False
+        return "URL too long", None, False
     except psycopg2.errors.UniqueViolation:
         url = url_repo.find_by_name(new_url)
         if url:
