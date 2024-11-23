@@ -1,19 +1,14 @@
 from flask import Flask, request, render_template, redirect, url_for
-from .config import SECRET_KEY, DATABASE_URL
-from page_analyzer.db_operators.database import URLRepository
-from page_analyzer.url_services.url_processing import set_flash_messages
-from page_analyzer.url_services.flash_messages import (handle_get_one_url,
-                                                       flash_message)
-from .url_services.url_checker import check_and_add_url_check
-from page_analyzer.db_operators.db_decorators import DatabaseConnection
+from .config import SECRET_KEY
+from page_analyzer.db_operators.database import (find_all_urls, find_checks)
+from page_analyzer.url_services.url_processing import (handle_url_submission)
+from page_analyzer.url_services.url_checker import (check_and_add_url_check,
+                                                    handle_get_one_url)
+from page_analyzer.db_operators.db_decorators import get_connection
+from flask import flash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-
-
-def get_db_connection():
-    """Helper function to create a database connection."""
-    return DatabaseConnection(DATABASE_URL)
 
 
 @app.route('/')
@@ -23,38 +18,45 @@ def get_index() -> str:
 
 
 @app.route('/urls', methods=['POST'])
-def get_urls_post() -> str:
-    """
-    Handles the URL submission and redirects
-    or renders based on the result.
-    """
-    db_connection = DatabaseConnection(DATABASE_URL)
-    url_repository = URLRepository(db_connection)
-    return set_flash_messages(url_repository, request.form.to_dict())
+def get_urls_post():
+    url = request.form['url']
+    with get_connection() as conn:
+        result, message, url_id = handle_url_submission(conn, url)
+
+    if result == 'error':
+        flash(message, 'alert-danger')
+        return render_template('index.html'), 422
+
+    if result == 'exists':
+        flash_message = ("Страница уже существует", 'alert-warning')
+    else:
+        flash_message = ("Страница успешно добавлена", 'alert-success')
+
+    flash(*flash_message)
+    return redirect(url_for('get_one_url', id=url_id))
 
 
 @app.route('/urls', methods=['GET'])
 def get_urls() -> str:
     """Displays a list of all URLs from the db_operators."""
-    db_connection = DatabaseConnection(DATABASE_URL)
-    url_repository = URLRepository(db_connection)
-    urls = url_repository.find_all_urls()
+    with get_connection() as conn:
+        urls = find_all_urls(conn)
     return render_template('urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>', methods=['GET'])
 def get_one_url(id: int) -> str:
     """Displays information about a specific URL by its ID."""
-    db_connection = DatabaseConnection(DATABASE_URL)
+    with get_connection() as conn:
+        url = handle_get_one_url(id, conn)
+        if url is None:
+            flash('Такой страницы не существует', 'alert-warning')
+            return redirect(url_for('get_index'))
 
-    url_repository = URLRepository(db_connection)
-    url = url_repository.find_by_id(id)
-    url = handle_get_one_url(url)
-    if url is None:
-        return redirect(url_for('get_index'))
-    checks = url_repository.find_checks(id)
+        checks = find_checks(conn, id)
     return render_template('show.html', ID=id, name=url.name,
-                           created_at=url.created_at, checks=checks)
+                           created_at=url.created_at,
+                           checks=checks)
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
@@ -62,9 +64,11 @@ def check_url(id: int) -> str:
     """
     Runs a URL availability check and adds the result to the db_operators.
     """
-    db_connection = DatabaseConnection(DATABASE_URL)
-    url_repo = URLRepository(db_connection)
-    url = url_repo.find_by_id(id)
-    result = check_and_add_url_check(url_repo, url)
-    flash_message(result)
+    with get_connection() as conn:
+        try:
+            check_and_add_url_check(conn, id)
+            flash('Страница успешно проверена', 'alert-success')
+        except:
+            flash('Произошла ошибка при проверке', 'alert-danger')
+
     return redirect(url_for('get_one_url', id=id))
