@@ -6,6 +6,7 @@ from page_analyzer.url_services.url_checker import (check_and_add_url_check,
                                                     handle_get_one_url)
 from page_analyzer.db_operators.db_decorators import get_connection
 from flask import flash
+import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -68,7 +69,6 @@ def check_url(id: int) -> str:
         try:
             check_and_add_url_check(conn, id)
             flash('Страница успешно проверена', 'alert-success')
-        except:
+        except requests.exceptions.RequestException:
             flash('Произошла ошибка при проверке', 'alert-danger')
-
     return redirect(url_for('get_one_url', id=id))
