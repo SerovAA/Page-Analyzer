@@ -1,10 +1,11 @@
 from flask import Flask, request, render_template, redirect, url_for
 from .config import SECRET_KEY
-from page_analyzer.db_operators.database import (find_all_urls, find_checks)
+from page_analyzer.db_operators.database_queries import (find_all_urls,
+                                                         find_checks)
 from page_analyzer.url_services.url_processing import (handle_url_submission)
 from page_analyzer.url_services.url_checker import (check_and_add_url_check,
                                                     handle_get_one_url)
-from page_analyzer.db_operators.db_decorators import get_connection
+from page_analyzer.db_operators.db_connection import get_connection
 from flask import flash
 import requests
 
