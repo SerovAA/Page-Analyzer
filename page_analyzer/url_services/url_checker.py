@@ -1,7 +1,8 @@
 from page_analyzer.parser import get_seo_data
 from page_analyzer.db_operators.database_queries import (find_by_id, add_check)
-from typing import Tuple, Dict, Union, Any, Optional
+from typing import Tuple, Dict, Union, Optional
 from page_analyzer.exceptions import URLError
+from psycopg2.extensions import connection
 import requests
 
 
