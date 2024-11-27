@@ -2,10 +2,11 @@ from contextlib import contextmanager
 import psycopg2
 from page_analyzer.config import DATABASE_URL
 from psycopg2.extras import NamedTupleCursor
+from psycopg2.extensions import connection
 
 
 @contextmanager
-def get_connection():
+def get_connection() -> connection:
     """"Context manager for database connection"""
     conn = None
     try:

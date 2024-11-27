@@ -5,8 +5,8 @@ from page_analyzer.exceptions import URLError
 import requests
 
 
-def check_url_status(url: Any) \
-        -> Tuple[int, Optional[str], Optional[str], Optional[str]]:
+def check_url_status(url: Dict[str, int]) \
+        -> Tuple[int, str, str, str]:
     """Checks the status of the passed URL, returning SEO data"""
     response = requests.get(url.name)
     response.raise_for_status()
@@ -14,7 +14,7 @@ def check_url_status(url: Any) \
     return response.status_code, h1, title, description
 
 
-def check_and_add_url_check(conn: Any, id: int) \
+def check_and_add_url_check(conn: connection, id: int) \
         -> Dict[str, Union[int, Optional[str]]]:
     """ Verifies a URL by ID and adds a check record to the database"""
     url = find_by_id(conn, id)
@@ -27,11 +27,11 @@ def check_and_add_url_check(conn: Any, id: int) \
             'title': title,
             'description': description
         }
-    except requests.exceptions.RequestException as e:
-        raise URLError from e
+    except requests.exceptions.RequestException:
+        raise URLError
 
 
-def handle_get_one_url(id: int, conn: Any) -> Optional[Dict[str, Any]]:
+def handle_get_one_url(id: int, conn: connection) -> Optional[Dict[str, int]]:
     """Returns a URL by ID or notifies if the URL is not found"""
     url = find_by_id(conn, id)
     if url is None:

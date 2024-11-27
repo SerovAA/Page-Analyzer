@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List, Tuple, Optional, Dict, Any
+from psycopg2.extensions import connection
 
 
-def find_all_urls(conn) \
+def find_all_urls(conn: connection) \
         -> List[Tuple[int, str, Optional[datetime], Optional[int]]]:
     """
     Returns all URLs from the database
@@ -22,7 +23,7 @@ def find_all_urls(conn) \
         return cursor.fetchall()
 
 
-def find_by_id(conn, id: int) -> Optional[Dict[str, Any]]:
+def find_by_id(conn: connection, id: int) -> Optional[Dict[str, Any]]:
     """Finds a URL by its ID."""
     query = "SELECT * FROM urls WHERE id = %s"
     with conn.cursor() as cursor:
@@ -30,7 +31,7 @@ def find_by_id(conn, id: int) -> Optional[Dict[str, Any]]:
         return cursor.fetchone()
 
 
-def find_by_name(conn, name: str) -> Optional[Dict[str, Any]]:
+def find_by_name(conn: connection, name: str) -> Optional[Dict[str, Any]]:
     """Finds a URL by its name."""
     query = "SELECT * FROM urls WHERE name = %s"
     with conn.cursor() as cursor:
@@ -38,7 +39,7 @@ def find_by_name(conn, name: str) -> Optional[Dict[str, Any]]:
         return cursor.fetchone()
 
 
-def find_checks(conn, url_id: int) -> List[Dict[str, Any]]:
+def find_checks(conn: connection, url_id: int) -> List[Dict[str, Any]]:
     """Returns all checks for the specified URL by ID."""
     query = """
         SELECT * FROM url_checks
@@ -50,7 +51,7 @@ def find_checks(conn, url_id: int) -> List[Dict[str, Any]]:
         return cursor.fetchall()
 
 
-def add_check(conn, id: int, status_code: int,
+def add_check(conn: connection, id: int, status_code: int,
               h1: str, title: str, description: str) -> None:
     """Adds a check record for a URL into the database."""
     query = """

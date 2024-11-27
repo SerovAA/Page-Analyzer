@@ -5,10 +5,10 @@ from page_analyzer.url_services.url_processing import (handle_url_submission)
 from page_analyzer.url_services.url_checker import (check_and_add_url_check,
                                                     handle_get_one_url)
 from page_analyzer.db_operators.db_connection import get_connection
-from page_analyzer.exceptions import URLError
+from page_analyzer.exceptions import (URL_Error, URLError,
+                                      URLTooLongError, InvalidURLError)
 from .config import SECRET_KEY
 from flask import flash
-import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -21,21 +21,25 @@ def get_index() -> str:
 
 
 @app.route('/urls', methods=['POST'])
-def get_urls_post():
+def get_urls_post() -> str:
     url = request.form['url']
     with get_connection() as conn:
-        result, message, url_id = handle_url_submission(conn, url)
+        try:
+            status, url_id = handle_url_submission(conn, url)
+        except URL_Error as e:
+            if isinstance(e, InvalidURLError):
+                flash("Некорректный URL", 'alert-danger')
+            elif isinstance(e, URLTooLongError):
+                flash("URL превышает 255 символов", 'alert-danger')
+            else:
+                flash("Произошла ошибка при проверке URL", 'alert-danger')
+            return render_template('index.html'), 422
 
-    if result == 'error':
-        flash(message, 'alert-danger')
-        return render_template('index.html'), 422
-
-    if result == 'exists':
-        flash_message = ("Страница уже существует", 'alert-warning')
+    if status == 'exists':
+        flash("Страница уже существует", 'alert-warning')
     else:
-        flash_message = ("Страница успешно добавлена", 'alert-success')
+        flash("Страница успешно добавлена", 'alert-success')
 
-    flash(*flash_message)
     return redirect(url_for('get_one_url', id=url_id))
 
 

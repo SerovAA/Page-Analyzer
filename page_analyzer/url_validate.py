@@ -6,10 +6,10 @@ MAX_URL_LEN = 255
 
 
 def validate_url(url: str) -> None:
-    if not validators.url(url):
-        raise InvalidURLError()
     if len(url) > MAX_URL_LEN:
         raise URLTooLongError()
+    if not validators.url(url):
+        raise InvalidURLError()
 
 
 def normalize_url(url: str) -> str:
