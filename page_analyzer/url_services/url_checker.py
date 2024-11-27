@@ -1,6 +1,7 @@
 from page_analyzer.parser import get_seo_data
 from page_analyzer.db_operators.database_queries import (find_by_id, add_check)
 from typing import Tuple, Dict, Union, Any, Optional
+from page_analyzer.exceptions import URLError
 import requests
 
 
@@ -26,8 +27,8 @@ def check_and_add_url_check(conn: Any, id: int) \
             'title': title,
             'description': description
         }
-    except requests.exceptions.RequestException:
-        raise
+    except requests.exceptions.RequestException as e:
+        raise URLError from e
 
 
 def handle_get_one_url(id: int, conn: Any) -> Optional[Dict[str, Any]]:

@@ -1,11 +1,12 @@
 from flask import Flask, request, render_template, redirect, url_for
-from .config import SECRET_KEY
 from page_analyzer.db_operators.database_queries import (find_all_urls,
                                                          find_checks)
 from page_analyzer.url_services.url_processing import (handle_url_submission)
 from page_analyzer.url_services.url_checker import (check_and_add_url_check,
                                                     handle_get_one_url)
 from page_analyzer.db_operators.db_connection import get_connection
+from page_analyzer.exceptions import URLError
+from .config import SECRET_KEY
 from flask import flash
 import requests
 
@@ -70,6 +71,6 @@ def check_url(id: int) -> str:
         try:
             check_and_add_url_check(conn, id)
             flash('Страница успешно проверена', 'alert-success')
-        except requests.exceptions.RequestException:
+        except URLError:
             flash('Произошла ошибка при проверке', 'alert-danger')
     return redirect(url_for('get_one_url', id=id))
